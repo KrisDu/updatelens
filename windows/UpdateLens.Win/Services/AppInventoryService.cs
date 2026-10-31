@@ -13,7 +13,7 @@ public sealed class AppInventoryService
     public int PromotedCount { get; private set; }
     public int AdoptedCount { get; private set; }
 
-    public async Task<List<AppEntry>> RefreshAsync()
+    public async Task<List<AppEntry>> RefreshAsync(IgnoreStore? ignores = null)
     {
         var reg = await Task.Run(() => _registry.Scan());
         WingetAvailable = _winget.IsAvailable();
@@ -187,14 +187,19 @@ public sealed class AppInventoryService
         {
             if (r.State == UpdateState.Unknown)
                 r.State = r.Source == AppSource.Winget ? UpdateState.UpToDate : UpdateState.Manual;
-            if (!string.IsNullOrWhiteSpace(r.VersionAvailable) && !string.IsNullOrWhiteSpace(r.IgnoredVersion)
+            if ((!string.IsNullOrWhiteSpace(r.VersionAvailable) && !string.IsNullOrWhiteSpace(r.IgnoredVersion)
                 && string.Equals(r.VersionAvailable, r.IgnoredVersion, StringComparison.OrdinalIgnoreCase))
+                || (ignores != null && ignores.IsIgnored(r.Id, r.VersionAvailable)))
                 r.State = UpdateState.Ignored;
             // Vendor fallback so Site works even when the registry key has no URL.
             if (r.State == UpdateState.Manual && string.IsNullOrWhiteSpace(r.VendorUrl)
                 && VendorMap.TryGet(r.Name, out var vurl, out _))
                 r.VendorUrl = vurl;
         }
+
+        // Persisted hides (Manual rows the user dismissed).
+        if (ignores != null)
+            results.RemoveAll(r => r.State == UpdateState.Manual && ignores.IsHidden(Norm(r.Name)));
 
         return results.OrderByDescending(a => a.State == UpdateState.UpdateAvailable)
                       .ThenBy(a => a.Name).ToList();

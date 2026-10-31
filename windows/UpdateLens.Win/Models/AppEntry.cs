@@ -31,6 +31,9 @@ public sealed class AppEntry
     public UpdateState State { get; set; } = UpdateState.Unknown;
     public string? VendorUrl { get; set; }
     public string? IgnoredVersion { get; set; }
+    public string? ExePath { get; set; }      // local exe for icon extraction (registry apps)
+    public string? IconPath { get; set; }     // cached png, filled post-scan
+    public string? LastLog { get; set; }      // last update attempt log
 
     public bool CanUpdate => State == UpdateState.UpdateAvailable;
 }

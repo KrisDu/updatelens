@@ -9,12 +9,11 @@
         TextOptions.TextFormattingMode="Display">
     <Window.Resources>
         <Color x:Key="Accent">#0067C0</Color>
-        <Color x:Key="AccentHover">#1975CC</Color>
-        <Color x:Key="AccentPressed">#005A9E</Color>
         <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource Accent}"/>
         <SolidColorBrush x:Key="CardBrush" Color="White"/>
         <SolidColorBrush x:Key="MutedBrush" Color="#616161"/>
         <SolidColorBrush x:Key="HairlineBrush" Color="#EDEBE9"/>
+        <BooleanToVisibilityConverter x:Key="BoolVis"/>
 
         <Style x:Key="PrimaryButton" TargetType="Button">
             <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
@@ -55,9 +54,11 @@
                     <TextBlock Text="Keep your apps current" FontSize="12" Foreground="{StaticResource MutedBrush}"/>
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="Settings" Style="{StaticResource GhostButton}"
+                            Command="{Binding SettingsCommand}" CommandParameter="{Binding ElementName=Root}"/>
                     <Button Content="Refresh" Style="{StaticResource GhostButton}" Command="{Binding RefreshCommand}"/>
                     <Button Content="{Binding UpdateCount, Mode=OneWay}" ContentStringFormat="Update all ({0})" Style="{StaticResource PrimaryButton}" Command="{Binding UpdateAllCommand}"/>
-                    <Button Content="Cancel" Style="{StaticResource GhostButton}" Command="{Binding CancelCommand}"/>
+                    <Button Content="Cancel" Style="{StaticResource GhostButton}" Command="{Binding CancelCommand}" IsEnabled="{Binding Busy, Mode=OneWay}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Border Background="#F3F3F3" BorderBrush="#E1DFDD" BorderThickness="1" CornerRadius="6" Padding="10,7" MinWidth="250">
@@ -88,8 +89,13 @@
         <!-- Status footer -->
         <Border DockPanel.Dock="Bottom" Background="White" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,1,0,0" Padding="16,9">
             <DockPanel>
-                <TextBlock DockPanel.Dock="Left" Text="{Binding Status, Mode=OneWay}" Foreground="{StaticResource MutedBrush}" FontSize="12" TextTrimming="CharacterEllipsis" MaxWidth="640"/>
+                <TextBlock DockPanel.Dock="Left" Text="{Binding Status, Mode=OneWay}" Foreground="{StaticResource MutedBrush}" FontSize="12" TextTrimming="CharacterEllipsis" MaxWidth="480"/>
                 <TextBlock DockPanel.Dock="Right" Text="{Binding LastChecked, StringFormat='Last checked {0}', Mode=OneWay}" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Visibility="{Binding Busy, Mode=OneWay, Converter={StaticResource BoolVis}}">
+                    <ProgressBar Width="150" Height="12" Minimum="0" Maximum="100" Value="{Binding ProgressValue, Mode=OneWay}" Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding ProgressText, Mode=OneWay}" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
+                </StackPanel>
             </DockPanel>
         </Border>
 
@@ -117,11 +123,15 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Avatar -->
-                            <Border Grid.Column="0" Width="42" Height="42" CornerRadius="21" Background="#E5F1FB" VerticalAlignment="Center" Margin="0,0,14,0">
-                                <TextBlock Text="{Binding Initials, Mode=OneWay}" Foreground="{StaticResource AccentBrush}"
-                                           FontWeight="SemiBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
+                            <!-- Avatar (initials underneath, real icon on top when available) -->
+                            <Grid Grid.Column="0" Width="42" Height="42" VerticalAlignment="Center" Margin="0,0,14,0">
+                                <Border CornerRadius="21" Background="#E5F1FB">
+                                    <TextBlock Text="{Binding Initials, Mode=OneWay}" Foreground="{StaticResource AccentBrush}"
+                                               FontWeight="SemiBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <Image Source="{Binding IconPath, Mode=OneWay}" Stretch="Uniform" Width="36" Height="36"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
 
                             <!-- Info -->
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -144,6 +154,11 @@
                                         Background="{StaticResource AccentBrush}" Foreground="White" BorderThickness="0"
                                         IsEnabled="{Binding CanUpdate, Mode=OneWay}"
                                         Command="{Binding DataContext.UpdateOneCommand, ElementName=Root}"
+                                        CommandParameter="{Binding}"/>
+                                <Button Content="Log" Style="{StaticResource CardButton}" ToolTip="Show update log"
+                                        Background="White" BorderBrush="#E1DFDD" BorderThickness="1"
+                                        Visibility="{Binding HasFailureLog, Mode=OneWay, Converter={StaticResource BoolVis}}"
+                                        Command="{Binding DataContext.ShowLogCommand, ElementName=Root}"
                                         CommandParameter="{Binding}"/>
                                 <Button Content="Skip" Style="{StaticResource CardButton}"
                                         Background="White" BorderBrush="#E1DFDD" BorderThickness="1"

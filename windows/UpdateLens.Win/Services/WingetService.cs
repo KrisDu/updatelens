@@ -155,6 +155,20 @@ public sealed class WingetService
         return rows.Where(r => IsRealWingetId(r.Id)).ToList();
     }
 
+    /// <summary>Installed version for a single winget Id, or null when unknown.</summary>
+    public async Task<string?> GetInstalledVersionAsync(string wingetId)
+    {
+        try
+        {
+            string t = await RunAsync($"list --id \"{wingetId}\" --accept-source-agreements --disable-interactivity", 30_000);
+            var row = ParseListOrUpgradeTable(t)
+                .FirstOrDefault(r => string.Equals(r.Id, wingetId, StringComparison.OrdinalIgnoreCase));
+            var v = row?.Installed?.Trim();
+            return string.IsNullOrWhiteSpace(v) ? null : v;
+        }
+        catch { return null; }
+    }
+
     public async Task<(bool Ok, int ExitCode, string Log)> UpgradeAsync(string wingetId, CancellationToken ct)
     {
         var psi = new ProcessStartInfo("winget",

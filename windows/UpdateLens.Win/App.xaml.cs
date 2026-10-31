@@ -1,22 +1,34 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
+using UpdateLens.Win.Services;
 
 namespace UpdateLens.Win;
 
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
+    /// <summary>True when launched as "UpdateLens.exe --check" (login / scheduled task).</summary>
+    public static bool CheckMode { get; private set; }
+
     protected override void OnStartup(StartupEventArgs e)
     {
+        CheckMode = e.Args.Any(a => string.Equals(a, "--check", StringComparison.OrdinalIgnoreCase));
+        NotifyService.Ensure();
         DispatcherUnhandledException += OnDispatcherUnhandled;
         AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandled;
         base.OnStartup(e);
     }
 
+    protected override void OnExit(ExitEventArgs e)
+    {
+        NotifyService.Shutdown();
+        base.OnExit(e);
+    }
+
     private void OnDispatcherUnhandled(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         WriteCrashLog(e.Exception);
-        MessageBox.Show("UpdateLens hit an unexpected error and will stay open.\n\n" + e.Exception.Message
+        System.Windows.MessageBox.Show("UpdateLens hit an unexpected error and will stay open.\n\n" + e.Exception.Message
             + "\n\nDetails saved to %LocalAppData%\\UpdateLens\\crash.log",
             "UpdateLens — error", MessageBoxButton.OK, MessageBoxImage.Error);
         e.Handled = true; // keep the app alive instead of crashing

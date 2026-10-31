@@ -39,12 +39,15 @@ public sealed class RegistryScanner
                         if (string.Equals(releaseType, "Security Update", StringComparison.OrdinalIgnoreCase)) continue;
                         if (AppFilter.IsSystemRegistryEntry(displayName, publisher, sysComp, releaseType, parentKey)) continue;
 
+                        var displayIcon = sub.GetValue("DisplayIcon") as string;
+                        var uninstall = sub.GetValue("UninstallString") as string;
                         results.Add(new AppEntry
                         {
                             Id = $"registry:{name}",
                             Name = displayName.Trim(),
                             VersionInstalled = (sub.GetValue("DisplayVersion") as string ?? "").Trim(),
                             Vendor = (publisher ?? "").Trim(),
+                            ExePath = IconService.ResolveExe(displayIcon, uninstall),
                             VendorUrl = (sub.GetValue("HelpLink") as string ?? sub.GetValue("URLInfoAbout") as string)?.Trim(),
                             Source = AppSource.System,
                             State = UpdateState.Unknown,
