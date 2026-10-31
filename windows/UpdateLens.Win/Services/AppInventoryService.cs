@@ -26,10 +26,12 @@ public sealed class AppInventoryService
         {
             try
             {
-                // 2 calls total (list + upgrade). List covers up-to-date apps,
-                // upgrade covers --include-unknown extras.
-                installed = await _winget.GetInstalledAsync();
-                upgrades = await _winget.GetUpgradesAsync();
+                // 2 independent calls, run together to halve scan time.
+                var listTask = _winget.GetInstalledAsync();
+                var upgradeTask = _winget.GetUpgradesAsync();
+                await Task.WhenAll(listTask, upgradeTask);
+                installed = await listTask;
+                upgrades = await upgradeTask;
                 // Hide drivers / runtimes / system components — user apps only.
                 installed = installed.Where(w => !AppFilter.IsSystemWingetRow(w.Name, w.Id)).ToList();
                 foreach (var sysId in upgrades.Keys.Where(k => AppFilter.IsSystemWingetRow(k, k)).ToList())
@@ -183,6 +185,15 @@ public sealed class AppInventoryService
             });
         }
 
+        ApplyStores(results, ignores);
+
+        return results.OrderByDescending(a => a.State == UpdateState.UpdateAvailable)
+                      .ThenBy(a => a.Name).ToList();
+    }
+
+    /// <summary>Shared finalize so cached scans honor current skips/hides too.</summary>
+    internal static void ApplyStores(List<AppEntry> results, IgnoreStore? ignores)
+    {
         foreach (var r in results)
         {
             if (r.State == UpdateState.Unknown)
@@ -200,9 +211,6 @@ public sealed class AppInventoryService
         // Persisted hides (Manual rows the user dismissed).
         if (ignores != null)
             results.RemoveAll(r => r.State == UpdateState.Manual && ignores.IsHidden(Norm(r.Name)));
-
-        return results.OrderByDescending(a => a.State == UpdateState.UpdateAvailable)
-                      .ThenBy(a => a.Name).ToList();
     }
 
     private void AdoptAsWinget(AppEntry r, string wingetId, string latest, HashSet<string> usedWingetIds)

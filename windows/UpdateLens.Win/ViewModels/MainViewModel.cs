@@ -208,10 +208,26 @@ public sealed class MainViewModel : INotifyPropertyChanged
     {
         if (Busy) return;
         Busy = true; DoneCount = 0; TotalCount = 0;
-        Status = "Scanning apps + matching winget catalog (first run slower)…";
         try
         {
+            // Instant: show the last scan while the live one runs.
+            if (!_checkToastShown && Apps.Count == 0)
+            {
+                var cached = await Task.Run(() => ScanCache.Load());
+                if (cached is { Apps.Count: > 0 })
+                {
+                    AppInventoryService.ApplyStores(cached.Value.Apps, _ignores);
+                    foreach (var e in cached.Value.Apps) Apps.Add(new AppRow(e));
+                    LastChecked = cached.Value.When.ToString("HH:mm:ss") + " (cached)";
+                    Status = $"Showing last scan — refreshing…";
+                    RefreshCounts();
+                    ApplyFilter();
+                    _ = LoadIconsAsync();
+                }
+            }
+            Status = "Scanning apps + matching winget catalog (first run slower)…";
             var list = await _inventory.RefreshAsync(_ignores);
+            ScanCache.Save(list);
             Apps.Clear();
             foreach (var e in list) Apps.Add(new AppRow(e));
             LastChecked = DateTime.Now.ToString("HH:mm:ss");

@@ -12,6 +12,7 @@
     <RootNamespace>UpdateLens.Win</RootNamespace>
     <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
     <Version>0.1.0</Version>
+    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 
   <ItemGroup>
