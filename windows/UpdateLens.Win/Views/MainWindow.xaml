@@ -11,15 +11,78 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolVis"/>
 
+        <!-- Theme-aware button chrome: native WPF buttons ignore dark mode,
+             so every button uses these Border-based templates instead. -->
+        <ControlTemplate x:Key="PrimaryBtnTemplate" TargetType="Button">
+            <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6"
+                    Padding="{TemplateBinding Padding}" BorderThickness="0">
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentPressedBrush}"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource InputBgBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="GhostBtnTemplate" TargetType="Button">
+            <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6"
+                    Padding="{TemplateBinding Padding}"
+                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource InputBgBrush}"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter TargetName="Bd" Property="Background" Value="Transparent"/>
+                    <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource HairlineBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="GhostToggleTemplate" TargetType="ToggleButton">
+            <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6"
+                    Padding="{TemplateBinding Padding}"
+                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                    <Setter TargetName="Bd" Property="BorderThickness" Value="0"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
         <Style x:Key="PrimaryButton" TargetType="Button">
             <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="16,8"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Margin" Value="4"/>
+            <Setter Property="Template" Value="{StaticResource PrimaryBtnTemplate}"/>
         </Style>
         <Style x:Key="GhostButton" TargetType="Button">
             <Setter Property="Background" Value="{DynamicResource CardBgBrush}"/>
@@ -30,6 +93,7 @@
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Margin" Value="4"/>
+            <Setter Property="Template" Value="{StaticResource GhostBtnTemplate}"/>
         </Style>
         <Style x:Key="GhostToggle" TargetType="ToggleButton">
             <Setter Property="Background" Value="{DynamicResource CardBgBrush}"/>
@@ -40,14 +104,31 @@
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Margin" Value="4"/>
+            <Setter Property="Template" Value="{StaticResource GhostToggleTemplate}"/>
         </Style>
-        <Style x:Key="CardButton" TargetType="Button">
+        <Style x:Key="CardPrimary" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
             <Setter Property="Padding" Value="14,7"/>
             <Setter Property="FontSize" Value="12.5"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Margin" Value="3"/>
             <Setter Property="MinWidth" Value="74"/>
+            <Setter Property="Template" Value="{StaticResource PrimaryBtnTemplate}"/>
+        </Style>
+        <Style x:Key="CardGhost" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource CardBgBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextFgBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="14,7"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="MinWidth" Value="74"/>
+            <Setter Property="Template" Value="{StaticResource GhostBtnTemplate}"/>
         </Style>
     </Window.Resources>
 
@@ -92,6 +173,7 @@
                         </Grid>
                     </Border>
                     <ComboBox Width="160" Margin="8,0,0,0" VerticalAlignment="Center" FontSize="13" Padding="6,7"
+                              Background="{DynamicResource CardBgBrush}" Foreground="{DynamicResource TextFgBrush}"
                               ItemsSource="{Binding Filters}" SelectedItem="{Binding Filter}" ToolTip="Filter apps"/>
                 </StackPanel>
             </DockPanel>
@@ -210,22 +292,18 @@
 
                                 <!-- Actions -->
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
-                                    <Button Content="Update" Style="{StaticResource CardButton}"
-                                            Background="{DynamicResource AccentBrush}" Foreground="White" BorderThickness="0"
+                                    <Button Content="Update" Style="{StaticResource CardPrimary}"
                                             IsEnabled="{Binding CanUpdate, Mode=OneWay}"
                                             Command="{Binding DataContext.UpdateOneCommand, ElementName=Root}"
                                             CommandParameter="{Binding}"/>
-                                    <Button Content="Log" Style="{StaticResource CardButton}" ToolTip="Show update log"
-                                            Background="{DynamicResource CardBgBrush}" Foreground="{DynamicResource TextFgBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1"
+                                    <Button Content="Log" Style="{StaticResource CardGhost}" ToolTip="Show update log"
                                             Visibility="{Binding HasFailureLog, Mode=OneWay, Converter={StaticResource BoolVis}}"
                                             Command="{Binding DataContext.ShowLogCommand, ElementName=Root}"
                                             CommandParameter="{Binding}"/>
-                                    <Button Content="Skip" Style="{StaticResource CardButton}"
-                                            Background="{DynamicResource CardBgBrush}" Foreground="{DynamicResource TextFgBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1"
+                                    <Button Content="Skip" Style="{StaticResource CardGhost}"
                                             Command="{Binding DataContext.SkipCommand, ElementName=Root}"
                                             CommandParameter="{Binding}"/>
-                                    <Button Content="Site" Style="{StaticResource CardButton}" ToolTip="Open vendor site"
-                                            Background="{DynamicResource CardBgBrush}" Foreground="{DynamicResource TextFgBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1"
+                                    <Button Content="Site" Style="{StaticResource CardGhost}" ToolTip="Open vendor site"
                                             IsEnabled="{Binding HasVendorUrl, Mode=OneWay}"
                                             Command="{Binding DataContext.OpenVendorCommand, ElementName=Root}"
                                             CommandParameter="{Binding}"/>

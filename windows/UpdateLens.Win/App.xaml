@@ -5,6 +5,8 @@
     <Application.Resources>
         <Color x:Key="Accent">#0067C0</Color>
         <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource Accent}"/>
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="#1975CC"/>
+        <SolidColorBrush x:Key="AccentPressedBrush" Color="#005A9E"/>
         <!-- Light defaults. ThemeService.Apply overwrites these at startup. -->
         <SolidColorBrush x:Key="AppBgBrush" Color="#F3F3F3"/>
         <SolidColorBrush x:Key="HeaderBgBrush" Color="White"/>

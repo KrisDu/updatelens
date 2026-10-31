@@ -12,6 +12,8 @@ public static class ThemeService
 
     private static readonly (string Key, string Light, string Dark)[] Brushes = new[]
     {
+        ("AccentHoverBrush", "#1975CC", "#4DA3E6"),
+        ("AccentPressedBrush", "#005A9E", "#2E7CC2"),
         ("AppBgBrush", "#F3F3F3", "#202020"),
         ("HeaderBgBrush", "#FFFFFF", "#2C2C2C"),
         ("CardBgBrush", "#FFFFFF", "#303030"),
