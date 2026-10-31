@@ -116,9 +116,24 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public string Filter
     {
         get => _filter;
-        set { _filter = value; OnPropertyChanged(); ApplyFilter(); }
+        set
+        {
+            _filter = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsFAll));
+            OnPropertyChanged(nameof(IsFUpdates));
+            OnPropertyChanged(nameof(IsFCurrent));
+            OnPropertyChanged(nameof(IsFManual));
+            ApplyFilter();
+        }
     }
     public List<string> Filters { get; } = new() { "All", "Updates Available", "Up to date", "Manual" };
+
+    // Segmented filter control (single-select ToggleButtons).
+    public bool IsFAll { get => Filter == "All"; set { if (value) Filter = "All"; else OnPropertyChanged(); } }
+    public bool IsFUpdates { get => Filter == "Updates Available"; set { if (value) Filter = "Updates Available"; else OnPropertyChanged(); } }
+    public bool IsFCurrent { get => Filter == "Up to date"; set { if (value) Filter = "Up to date"; else OnPropertyChanged(); } }
+    public bool IsFManual { get => Filter == "Manual"; set { if (value) Filter = "Manual"; else OnPropertyChanged(); } }
 
     private string _status = "Click Refresh to scan.";
     public string Status { get => _status; set { _status = value; OnPropertyChanged(); } }
@@ -137,12 +152,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     private string _lastChecked = "Never";
     public string LastChecked { get => _lastChecked; set { _lastChecked = value; OnPropertyChanged(); } }
-
-    public bool IsDark
-    {
-        get => ThemeService.IsDark;
-        set { ThemeService.SetDark(value); OnPropertyChanged(); }
-    }
 
     public int UpdateCount => Apps.Count(a => a.State == UpdateState.UpdateAvailable);
 
@@ -201,7 +210,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
             var dlg = new SettingsWindow();
             if (p is Window owner) dlg.Owner = owner;
             if (dlg.ShowDialog() == true) _ = RefreshAsync();
-            OnPropertyChanged(nameof(IsDark)); // theme may have changed in Settings
         });
         ResetSkipsCommand = new AsyncRelayCommand(_ =>
         {
