@@ -123,7 +123,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public async Task RefreshAsync()
     {
         if (Busy) return;
-        Busy = true; Status = "Scanning installed apps + winget upgrades…";
+        Busy = true; Status = "Scanning apps + matching winget catalog (first run slower)…";
         try
         {
             var list = await _inventory.RefreshAsync();
@@ -133,7 +133,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             if (!_inventory.WingetAvailable)
                 Status = $"Found {Apps.Count} apps. winget not found — updates limited to manual. Install WinGet / App Installer.";
             else
-                Status = $"Found {Apps.Count} apps, {UpdateCount} with updates ({_inventory.PromotedCount} matched to winget).";
+                Status = $"Found {Apps.Count} apps, {UpdateCount} with updates ({_inventory.PromotedCount} matched, {_inventory.AdoptedCount} via search).";
             RefreshCounts();
             ApplyFilter();
         }
