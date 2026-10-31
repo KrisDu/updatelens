@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Name="Root"
-        Title="UpdateLens" Height="660" Width="1080"
+        Title="UpdateLens" Height="660" Width="1080" MinWidth="860" MinHeight="540"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource AppBgBrush}"
         Foreground="{DynamicResource TextFgBrush}"
@@ -134,54 +134,69 @@
 
     <DockPanel>
         <!-- Header bar -->
-        <Border DockPanel.Dock="Top" Background="{DynamicResource HeaderBgBrush}" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="0,0,0,1" Padding="16,12">
-            <DockPanel>
-                <Image DockPanel.Dock="Left" Width="34" Height="34" Margin="0,0,12,0" VerticalAlignment="Center"
-                       Source="pack://application:,,,/Assets/logo.png"/>
-                <StackPanel DockPanel.Dock="Left" Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="UpdateLens" FontSize="17" FontWeight="SemiBold"/>
-                    <TextBlock Text="Keep your apps current" FontSize="12" Foreground="{DynamicResource MutedBrush}"/>
+        <Border DockPanel.Dock="Top" Background="{DynamicResource HeaderBgBrush}" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="0,0,0,1" Padding="16,10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <Image Width="34" Height="34" Margin="0,0,12,0" VerticalAlignment="Center"
+                           Source="pack://application:,,,/Assets/logo.png"/>
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                        <TextBlock Text="UpdateLens" FontSize="17" FontWeight="SemiBold"/>
+                        <TextBlock Text="Keep your apps current" FontSize="12" Foreground="{DynamicResource MutedBrush}"/>
+                    </StackPanel>
                 </StackPanel>
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+
+                <Border Grid.Row="0" Grid.Column="1" Background="{DynamicResource InputBgBrush}" BorderBrush="{DynamicResource InputBorderBrush}"
+                        BorderThickness="1" CornerRadius="6" Padding="10,7" MinWidth="140" MaxWidth="420"
+                        HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <Grid>
+                        <TextBox x:Name="SearchBox" Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent"
+                                 Foreground="{DynamicResource TextFgBrush}" CaretBrush="{DynamicResource TextFgBrush}"
+                                 ToolTip="Search apps" FontSize="13" VerticalAlignment="Center"/>
+                        <TextBlock Text="Search" Foreground="{DynamicResource MutedBrush}" FontSize="13" Margin="2,0,0,0"
+                                   VerticalAlignment="Center" IsHitTestVisible="False">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </Border>
+
+                <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Content="Settings" Style="{StaticResource GhostButton}"
                             Command="{Binding SettingsCommand}" CommandParameter="{Binding ElementName=Root}"/>
                     <Button Content="Refresh" Style="{StaticResource GhostButton}" Command="{Binding RefreshCommand}"/>
                     <Button Content="{Binding UpdateCount, Mode=OneWay}" ContentStringFormat="Update all ({0})" Style="{StaticResource PrimaryButton}" Command="{Binding UpdateAllCommand}"/>
                     <Button Content="Cancel" Style="{StaticResource GhostButton}" Command="{Binding CancelCommand}" IsEnabled="{Binding Busy, Mode=OneWay}"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="{DynamicResource InputBgBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10,7" MinWidth="220">
-                        <Grid>
-                            <TextBox x:Name="SearchBox" Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent"
-                                     Foreground="{DynamicResource TextFgBrush}" CaretBrush="{DynamicResource TextFgBrush}"
-                                     ToolTip="Search apps" FontSize="13" VerticalAlignment="Center"/>
-                            <TextBlock Text="Search" Foreground="{DynamicResource MutedBrush}" FontSize="13" Margin="2,0,0,0"
-                                       VerticalAlignment="Center" IsHitTestVisible="False">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </Grid>
-                    </Border>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
-                        <ToggleButton Content="All" Style="{StaticResource GhostToggle}" FontSize="12.5" Padding="10,7" Margin="2"
-                                        ToolTip="Show all apps" IsChecked="{Binding IsFAll, Mode=TwoWay}"/>
-                        <ToggleButton Content="Updates" Style="{StaticResource GhostToggle}" FontSize="12.5" Padding="10,7" Margin="2"
-                                        ToolTip="Show apps with updates" IsChecked="{Binding IsFUpdates, Mode=TwoWay}"/>
-                        <ToggleButton Content="Current" Style="{StaticResource GhostToggle}" FontSize="12.5" Padding="10,7" Margin="2"
-                                        ToolTip="Show up-to-date apps" IsChecked="{Binding IsFCurrent, Mode=TwoWay}"/>
-                        <ToggleButton Content="Manual" Style="{StaticResource GhostToggle}" FontSize="12.5" Padding="10,7" Margin="2"
-                                        ToolTip="Show manually-managed apps" IsChecked="{Binding IsFManual, Mode=TwoWay}"/>
-                    </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10,0,0">
+                    <ToggleButton Content="All" Style="{StaticResource GhostToggle}" FontSize="12.5" Padding="10,7" Margin="0,0,4,0"
+                                    ToolTip="Show all apps" IsChecked="{Binding IsFAll, Mode=TwoWay}"/>
+                    <ToggleButton Content="Updates" Style="{StaticResource GhostToggle}" FontSize="12.5" Padding="10,7" Margin="0,0,4,0"
+                                    ToolTip="Show apps with updates" IsChecked="{Binding IsFUpdates, Mode=TwoWay}"/>
+                    <ToggleButton Content="Current" Style="{StaticResource GhostToggle}" FontSize="12.5" Padding="10,7" Margin="0,0,4,0"
+                                    ToolTip="Show up-to-date apps" IsChecked="{Binding IsFCurrent, Mode=TwoWay}"/>
+                    <ToggleButton Content="Manual" Style="{StaticResource GhostToggle}" FontSize="12.5" Padding="10,7" Margin="0"
+                                    ToolTip="Show manually-managed apps" IsChecked="{Binding IsFManual, Mode=TwoWay}"/>
                 </StackPanel>
-            </DockPanel>
+            </Grid>
         </Border>
 
         <!-- Status footer -->
