@@ -1,5 +1,7 @@
 # UpdateLens
 
+<img src="windows/UpdateLens.Win/Assets/logo.png" alt="UpdateLens logo" width="96"/>
+
 Desktop app that lists installed software and updates it — individually or all at once.
 
 - `windows/UpdateLens.Win` — C# + XAML (WPF, .NET 8), WinGet-backed

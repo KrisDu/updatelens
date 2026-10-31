@@ -4,6 +4,7 @@
         x:Name="Root"
         Title="UpdateLens" Height="660" Width="980"
         WindowStartupLocation="CenterScreen"
+        Icon="pack://application:,,,/Assets/logo.ico"
         Background="#F3F3F3"
         FontFamily="Segoe UI Variable Text, Segoe UI"
         TextOptions.TextFormattingMode="Display">
@@ -49,6 +50,8 @@
         <!-- Header bar -->
         <Border DockPanel.Dock="Top" Background="White" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,0,0,1" Padding="16,12">
             <DockPanel>
+                <Image DockPanel.Dock="Left" Width="34" Height="34" Margin="0,0,12,0" VerticalAlignment="Center"
+                       Source="pack://application:,,,/Assets/logo.png"/>
                 <StackPanel DockPanel.Dock="Left" Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="UpdateLens" FontSize="17" FontWeight="SemiBold"/>
                     <TextBlock Text="Keep your apps current" FontSize="12" Foreground="{StaticResource MutedBrush}"/>

@@ -10,8 +10,13 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <AssemblyName>UpdateLens</AssemblyName>
     <RootNamespace>UpdateLens.Win</RootNamespace>
-    <ApplicationIcon></ApplicationIcon>
+    <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
     <Version>0.1.0</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\logo.ico" />
+    <Resource Include="Assets\logo.png" />
+  </ItemGroup>
 
 </Project>
