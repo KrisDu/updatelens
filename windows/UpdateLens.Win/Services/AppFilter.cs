@@ -14,6 +14,7 @@ public static class AppFilter
         new Regex(@"targeting pack|standard targeting|desktop runtime|shared framework|workload|manifest-|mono toolchain|emscripten", RegexOptions.IgnoreCase | RegexOptions.Compiled),
         new Regex(@"webview2", RegexOptions.IgnoreCase | RegexOptions.Compiled),
         new Regex(@"windows (sdk|software development kit|application compatibility|desktop targeting)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new Regex(@"xaml|vclibs|native runtime|widgets.*runtime|windowsapp|winui", RegexOptions.IgnoreCase | RegexOptions.Compiled),
         new Regex(@"click-to-run|extensibility component|licensing component|compatibility database", RegexOptions.IgnoreCase | RegexOptions.Compiled),
         new Regex(@"\bnvidia\b|physx|nvcpl|nvdlisr|frameview|shadowplay|nvcontainer", RegexOptions.IgnoreCase | RegexOptions.Compiled),
         new Regex(@"\bintel\b|realtek|qualcomm|synaptics|elan|amd chipset", RegexOptions.IgnoreCase | RegexOptions.Compiled),
@@ -24,9 +25,9 @@ public static class AppFilter
 
     private static readonly Regex[] WingetHide = new[]
     {
-        new Regex(@"visual c\+\+|redistributable", RegexOptions.IgnoreCase | RegexOptions.Compiled),
-        new Regex(@"\.net\s|\.net$|dotnet|apphost|targeting pack|shared framework|windows sdk", RegexOptions.IgnoreCase | RegexOptions.Compiled),
-        new Regex(@"webview2", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new Regex(@"visual c\+\+|redistributable|vclibs", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new Regex(@"\.net\s|\.net$|dotnet|apphost|targeting pack|shared framework|windows sdk|native runtime", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new Regex(@"webview2|xaml|winui|windowsapp|widgets.*runtime", RegexOptions.IgnoreCase | RegexOptions.Compiled),
         new Regex(@"nvidia|physx|intel\W.*driver|realtek|qualcomm|driver|firmware|\bbios\b|chipset", RegexOptions.IgnoreCase | RegexOptions.Compiled),
     };
 
