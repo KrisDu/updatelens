@@ -20,6 +20,26 @@ public sealed class AppRow : INotifyPropertyChanged
     public string? VendorUrl => Entry.VendorUrl;
     public bool HasVendorUrl => !string.IsNullOrWhiteSpace(Entry.VendorUrl);
 
+    public string Initials
+    {
+        get
+        {
+            var words = Name.Split(new[] { ' ', '-', '_' }, StringSplitOptions.RemoveEmptyEntries);
+            if (words.Length == 0) return "?";
+            if (words.Length == 1)
+                return words[0].Substring(0, Math.Min(2, words[0].Length)).ToUpperInvariant();
+            return string.Concat(words.Take(2).Select(w => char.ToUpperInvariant(w[0])));
+        }
+    }
+
+    public string StatusTone => State switch
+    {
+        UpdateState.UpdateAvailable or UpdateState.Updating => "Blue",
+        UpdateState.UpToDate or UpdateState.Updated => "Green",
+        UpdateState.Failed => "Red",
+        _ => "Gray",
+    };
+
     public string VersionInstalled => Entry.VersionInstalled;
     public string? VersionAvailable
     {
@@ -30,7 +50,7 @@ public sealed class AppRow : INotifyPropertyChanged
     public UpdateState State
     {
         get => Entry.State;
-        set { Entry.State = value; OnPropertyChanged(); OnPropertyChanged(nameof(StatusText)); OnPropertyChanged(nameof(CanUpdate)); }
+        set { Entry.State = value; OnPropertyChanged(); OnPropertyChanged(nameof(StatusText)); OnPropertyChanged(nameof(CanUpdate)); OnPropertyChanged(nameof(StatusTone)); }
     }
 
     public string StatusText => State switch
