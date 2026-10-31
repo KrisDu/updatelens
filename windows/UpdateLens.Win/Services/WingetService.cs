@@ -43,7 +43,8 @@ public sealed class WingetService
         };
         using var p = new Process { StartInfo = psi };
         var outText = new System.Text.StringBuilder();
-        p.OutputDataReceived += (_, e) => { if (e.Data != null) outText.AppendLine(e.Data); };
+        object logLock = new();
+        p.OutputDataReceived += (_, e) => { if (e.Data != null) lock (logLock) outText.AppendLine(e.Data); };
         p.ErrorDataReceived += (_, e) => { };
         p.Start();
         p.BeginOutputReadLine();
@@ -166,8 +167,9 @@ public sealed class WingetService
         };
         using var p = new Process { StartInfo = psi };
         var log = new System.Text.StringBuilder();
-        p.OutputDataReceived += (_, e) => { if (e.Data != null) log.AppendLine(e.Data); };
-        p.ErrorDataReceived += (_, e) => { if (e.Data != null) log.AppendLine(e.Data); };
+        object logLock = new();
+        p.OutputDataReceived += (_, e) => { if (e.Data != null) lock (logLock) log.AppendLine(e.Data); };
+        p.ErrorDataReceived += (_, e) => { if (e.Data != null) lock (logLock) log.AppendLine(e.Data); };
         try
         {
             p.Start();

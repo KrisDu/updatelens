@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows.Input;
 
 namespace UpdateLens.Win.ViewModels;
@@ -25,7 +26,22 @@ public sealed class AsyncRelayCommand : ICommand
     public async void Execute(object? p)
     {
         _running = true; RaiseCanExecuteChanged();
-        try { await _execute(p); } finally { _running = false; RaiseCanExecuteChanged(); }
+        try { await _execute(p); }
+        catch (Exception ex)
+        {
+            // Never let an async-void command take down the process.
+            try
+            {
+                var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UpdateLens");
+                Directory.CreateDirectory(dir);
+                File.AppendAllText(Path.Combine(dir, "crash.log"),
+                    $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] command failed: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}\n\n");
+            }
+            catch { }
+            System.Windows.MessageBox.Show("Action failed:\n" + ex.Message, "UpdateLens",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+        }
+        finally { _running = false; RaiseCanExecuteChanged(); }
     }
     public event EventHandler? CanExecuteChanged;
     public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
