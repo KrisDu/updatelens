@@ -13,6 +13,7 @@ public partial class App : System.Windows.Application
     protected override void OnStartup(StartupEventArgs e)
     {
         CheckMode = e.Args.Any(a => string.Equals(a, "--check", StringComparison.OrdinalIgnoreCase));
+        ThemeService.Init();
         NotifyService.Ensure();
         DispatcherUnhandledException += OnDispatcherUnhandled;
         AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandled;

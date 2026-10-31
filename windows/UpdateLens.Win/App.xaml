@@ -3,5 +3,25 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="Views/MainWindow.xaml">
     <Application.Resources>
+        <Color x:Key="Accent">#0067C0</Color>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource Accent}"/>
+        <!-- Light defaults. ThemeService.Apply overwrites these at startup. -->
+        <SolidColorBrush x:Key="AppBgBrush" Color="#F3F3F3"/>
+        <SolidColorBrush x:Key="HeaderBgBrush" Color="White"/>
+        <SolidColorBrush x:Key="CardBgBrush" Color="White"/>
+        <SolidColorBrush x:Key="TextFgBrush" Color="#1B1A19"/>
+        <SolidColorBrush x:Key="MutedBrush" Color="#616161"/>
+        <SolidColorBrush x:Key="HairlineBrush" Color="#EDEBE9"/>
+        <SolidColorBrush x:Key="InputBgBrush" Color="#F3F3F3"/>
+        <SolidColorBrush x:Key="InputBorderBrush" Color="#E1DFDD"/>
+        <SolidColorBrush x:Key="AvatarBgBrush" Color="#E5F1FB"/>
+        <SolidColorBrush x:Key="PillBlueBg" Color="#E5F1FB"/>
+        <SolidColorBrush x:Key="PillBlueFg" Color="#0067C0"/>
+        <SolidColorBrush x:Key="PillGreenBg" Color="#E6F4EA"/>
+        <SolidColorBrush x:Key="PillGreenFg" Color="#107C10"/>
+        <SolidColorBrush x:Key="PillRedBg" Color="#FDE7E9"/>
+        <SolidColorBrush x:Key="PillRedFg" Color="#C42B1C"/>
+        <SolidColorBrush x:Key="PillGrayBg" Color="#F0F0F0"/>
+        <SolidColorBrush x:Key="PillGrayFg" Color="#616161"/>
     </Application.Resources>
 </Application>

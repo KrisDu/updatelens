@@ -4,20 +4,15 @@
         x:Name="Root"
         Title="UpdateLens" Height="660" Width="980"
         WindowStartupLocation="CenterScreen"
-        Icon="pack://application:,,,/Assets/logo.ico"
-        Background="#F3F3F3"
+        Background="{DynamicResource AppBgBrush}"
+        Foreground="{DynamicResource TextFgBrush}"
         FontFamily="Segoe UI Variable Text, Segoe UI"
         TextOptions.TextFormattingMode="Display">
     <Window.Resources>
-        <Color x:Key="Accent">#0067C0</Color>
-        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource Accent}"/>
-        <SolidColorBrush x:Key="CardBrush" Color="White"/>
-        <SolidColorBrush x:Key="MutedBrush" Color="#616161"/>
-        <SolidColorBrush x:Key="HairlineBrush" Color="#EDEBE9"/>
         <BooleanToVisibilityConverter x:Key="BoolVis"/>
 
         <Style x:Key="PrimaryButton" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="16,8"/>
@@ -27,9 +22,19 @@
             <Setter Property="Margin" Value="4"/>
         </Style>
         <Style x:Key="GhostButton" TargetType="Button">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="#1B1A19"/>
-            <Setter Property="BorderBrush" Value="#E1DFDD"/>
+            <Setter Property="Background" Value="{DynamicResource CardBgBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextFgBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="4"/>
+        </Style>
+        <Style x:Key="GhostToggle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="{DynamicResource CardBgBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextFgBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="14,8"/>
             <Setter Property="FontSize" Value="13"/>
@@ -48,15 +53,17 @@
 
     <DockPanel>
         <!-- Header bar -->
-        <Border DockPanel.Dock="Top" Background="White" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,0,0,1" Padding="16,12">
+        <Border DockPanel.Dock="Top" Background="{DynamicResource HeaderBgBrush}" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="0,0,0,1" Padding="16,12">
             <DockPanel>
                 <Image DockPanel.Dock="Left" Width="34" Height="34" Margin="0,0,12,0" VerticalAlignment="Center"
                        Source="pack://application:,,,/Assets/logo.png"/>
                 <StackPanel DockPanel.Dock="Left" Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,16,0">
                     <TextBlock Text="UpdateLens" FontSize="17" FontWeight="SemiBold"/>
-                    <TextBlock Text="Keep your apps current" FontSize="12" Foreground="{StaticResource MutedBrush}"/>
+                    <TextBlock Text="Keep your apps current" FontSize="12" Foreground="{DynamicResource MutedBrush}"/>
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <ToggleButton Content="Dark" Style="{StaticResource GhostToggle}" ToolTip="Toggle dark mode"
+                                  IsChecked="{Binding IsDark, Mode=TwoWay}"/>
                     <Button Content="Settings" Style="{StaticResource GhostButton}"
                             Command="{Binding SettingsCommand}" CommandParameter="{Binding ElementName=Root}"/>
                     <Button Content="Refresh" Style="{StaticResource GhostButton}" Command="{Binding RefreshCommand}"/>
@@ -64,11 +71,12 @@
                     <Button Content="Cancel" Style="{StaticResource GhostButton}" Command="{Binding CancelCommand}" IsEnabled="{Binding Busy, Mode=OneWay}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="#F3F3F3" BorderBrush="#E1DFDD" BorderThickness="1" CornerRadius="6" Padding="10,7" MinWidth="250">
+                    <Border Background="{DynamicResource InputBgBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10,7" MinWidth="220">
                         <Grid>
                             <TextBox x:Name="SearchBox" Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent"
+                                     Foreground="{DynamicResource TextFgBrush}" CaretBrush="{DynamicResource TextFgBrush}"
                                      ToolTip="Search apps" FontSize="13" VerticalAlignment="Center"/>
-                            <TextBlock Text="Search" Foreground="#9E9E9E" FontSize="13" Margin="2,0,0,0"
+                            <TextBlock Text="Search" Foreground="{DynamicResource MutedBrush}" FontSize="13" Margin="2,0,0,0"
                                        VerticalAlignment="Center" IsHitTestVisible="False">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
@@ -83,141 +91,191 @@
                             </TextBlock>
                         </Grid>
                     </Border>
-                    <ComboBox Width="170" Margin="8,0,0,0" VerticalAlignment="Center" FontSize="13" Padding="6,7"
+                    <ComboBox Width="160" Margin="8,0,0,0" VerticalAlignment="Center" FontSize="13" Padding="6,7"
                               ItemsSource="{Binding Filters}" SelectedItem="{Binding Filter}" ToolTip="Filter apps"/>
                 </StackPanel>
             </DockPanel>
         </Border>
 
         <!-- Status footer -->
-        <Border DockPanel.Dock="Bottom" Background="White" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,1,0,0" Padding="16,9">
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource HeaderBgBrush}" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="0,1,0,0" Padding="16,9">
             <DockPanel>
-                <TextBlock DockPanel.Dock="Left" Text="{Binding Status, Mode=OneWay}" Foreground="{StaticResource MutedBrush}" FontSize="12" TextTrimming="CharacterEllipsis" MaxWidth="480"/>
-                <TextBlock DockPanel.Dock="Right" Text="{Binding LastChecked, StringFormat='Last checked {0}', Mode=OneWay}" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
+                <TextBlock DockPanel.Dock="Left" Text="{Binding Status, Mode=OneWay}" Foreground="{DynamicResource MutedBrush}" FontSize="12" TextTrimming="CharacterEllipsis" MaxWidth="480"/>
+                <TextBlock DockPanel.Dock="Right" Text="{Binding LastChecked, StringFormat='Last checked {0}', Mode=OneWay}" Foreground="{DynamicResource MutedBrush}" FontSize="12"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
                             Visibility="{Binding Busy, Mode=OneWay, Converter={StaticResource BoolVis}}">
                     <ProgressBar Width="150" Height="12" Minimum="0" Maximum="100" Value="{Binding ProgressValue, Mode=OneWay}" Margin="0,0,8,0"/>
-                    <TextBlock Text="{Binding ProgressText, Mode=OneWay}" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
+                    <TextBlock Text="{Binding ProgressText, Mode=OneWay}" Foreground="{DynamicResource MutedBrush}" FontSize="12"/>
                 </StackPanel>
             </DockPanel>
         </Border>
 
         <!-- App cards -->
-        <ListView ItemsSource="{Binding Filtered, Mode=OneWay}" Margin="12,8" Background="Transparent" BorderThickness="0"
-                  HorizontalContentAlignment="Stretch" SelectionMode="Single"
-                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    <Setter Property="Background" Value="Transparent"/>
-                    <Setter Property="BorderThickness" Value="0"/>
-                    <Setter Property="Padding" Value="0,4"/>
-                    <Setter Property="Focusable" Value="False"/>
-                </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <Border Background="{StaticResource CardBrush}" CornerRadius="10" Padding="14,12"
-                            BorderBrush="{StaticResource HairlineBrush}" BorderThickness="1">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+        <Grid>
+            <ListView ItemsSource="{Binding Filtered, Mode=OneWay}" Margin="12,8" Background="Transparent" BorderThickness="0"
+                      HorizontalContentAlignment="Stretch" SelectionMode="Single"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="0,4"/>
+                        <Setter Property="Focusable" Value="False"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border x:Name="Card" CornerRadius="10" Padding="14,12">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="{DynamicResource CardBgBrush}"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                            <!-- Avatar (initials when no icon, real icon otherwise) -->
-                            <Grid Grid.Column="0" Width="42" Height="42" VerticalAlignment="Center" Margin="0,0,14,0">
-                                <Border CornerRadius="21" Background="#E5F1FB">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IconPath, Mode=OneWay}" Value="{x:Null}">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                    <TextBlock Text="{Binding Initials, Mode=OneWay}" Foreground="{StaticResource AccentBrush}"
-                                               FontWeight="SemiBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <Image Source="{Binding IconPath, Mode=OneWay}" Stretch="Uniform" Width="40" Height="40"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Image.Style>
-                                        <Style TargetType="Image">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IconPath, Mode=OneWay}" Value="{x:Null}">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Image.Style>
-                                </Image>
+                                <!-- Avatar (initials when no icon, real icon otherwise) -->
+                                <Grid Grid.Column="0" Width="42" Height="42" VerticalAlignment="Center" Margin="0,0,14,0">
+                                    <Border CornerRadius="21" Background="{DynamicResource AvatarBgBrush}">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IconPath, Mode=OneWay}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding Initials, Mode=OneWay}" Foreground="{DynamicResource AccentBrush}"
+                                                   FontWeight="SemiBold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <Image Source="{Binding IconPath, Mode=OneWay}" Stretch="Uniform" Width="40" Height="40"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IconPath, Mode=OneWay}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                </Grid>
+
+                                <!-- Info -->
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name, Mode=OneWay}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource MutedBrush}" Margin="0,2,0,6">
+                                        <Run Text="{Binding Vendor, Mode=OneWay}"/><Run Text="  •  "/><Run Text="{Binding Source, Mode=OneWay}"/><Run Text="  •  "/><Run Text="{Binding VersionInstalled, Mode=OneWay}"/>
+                                    </TextBlock>
+                                    <Border x:Name="Pill" CornerRadius="9" Padding="9,4" HorizontalAlignment="Left" BorderThickness="0">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="{DynamicResource PillGrayBg}"/>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse x:Name="Dot" Width="8" Height="8" Margin="0,0,7,0">
+                                                <Ellipse.Style>
+                                                    <Style TargetType="Ellipse">
+                                                        <Setter Property="Fill" Value="{DynamicResource PillGrayFg}"/>
+                                                    </Style>
+                                                </Ellipse.Style>
+                                            </Ellipse>
+                                            <TextBlock x:Name="PillText" Text="{Binding StatusText, Mode=OneWay}" FontSize="12">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource PillGrayFg}"/>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- Actions -->
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                                    <Button Content="Update" Style="{StaticResource CardButton}"
+                                            Background="{DynamicResource AccentBrush}" Foreground="White" BorderThickness="0"
+                                            IsEnabled="{Binding CanUpdate, Mode=OneWay}"
+                                            Command="{Binding DataContext.UpdateOneCommand, ElementName=Root}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Content="Log" Style="{StaticResource CardButton}" ToolTip="Show update log"
+                                            Background="{DynamicResource CardBgBrush}" Foreground="{DynamicResource TextFgBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1"
+                                            Visibility="{Binding HasFailureLog, Mode=OneWay, Converter={StaticResource BoolVis}}"
+                                            Command="{Binding DataContext.ShowLogCommand, ElementName=Root}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Content="Skip" Style="{StaticResource CardButton}"
+                                            Background="{DynamicResource CardBgBrush}" Foreground="{DynamicResource TextFgBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1"
+                                            Command="{Binding DataContext.SkipCommand, ElementName=Root}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Content="Site" Style="{StaticResource CardButton}" ToolTip="Open vendor site"
+                                            Background="{DynamicResource CardBgBrush}" Foreground="{DynamicResource TextFgBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1"
+                                            IsEnabled="{Binding HasVendorUrl, Mode=OneWay}"
+                                            Command="{Binding DataContext.OpenVendorCommand, ElementName=Root}"
+                                            CommandParameter="{Binding}"/>
+                                </StackPanel>
                             </Grid>
+                        </Border>
+                        <DataTemplate.Triggers>
+                            <!-- Blue: update available / working -->
+                            <DataTrigger Binding="{Binding StatusTone, Mode=OneWay}" Value="Blue">
+                                <Setter TargetName="Pill" Property="Background" Value="{DynamicResource PillBlueBg}"/>
+                                <Setter TargetName="Dot" Property="Fill" Value="{DynamicResource PillBlueFg}"/>
+                                <Setter TargetName="PillText" Property="Foreground" Value="{DynamicResource PillBlueFg}"/>
+                            </DataTrigger>
+                            <!-- Green: current -->
+                            <DataTrigger Binding="{Binding StatusTone, Mode=OneWay}" Value="Green">
+                                <Setter TargetName="Pill" Property="Background" Value="{DynamicResource PillGreenBg}"/>
+                                <Setter TargetName="Dot" Property="Fill" Value="{DynamicResource PillGreenFg}"/>
+                                <Setter TargetName="PillText" Property="Foreground" Value="{DynamicResource PillGreenFg}"/>
+                            </DataTrigger>
+                            <!-- Red: failed -->
+                            <DataTrigger Binding="{Binding StatusTone, Mode=OneWay}" Value="Red">
+                                <Setter TargetName="Pill" Property="Background" Value="{DynamicResource PillRedBg}"/>
+                                <Setter TargetName="Dot" Property="Fill" Value="{DynamicResource PillRedFg}"/>
+                                <Setter TargetName="PillText" Property="Foreground" Value="{DynamicResource PillRedFg}"/>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
 
-                            <!-- Info -->
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Name, Mode=OneWay}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis"/>
-                                <TextBlock FontSize="12" Foreground="{StaticResource MutedBrush}" Margin="0,2,0,6">
-                                    <Run Text="{Binding Vendor, Mode=OneWay}"/><Run Text="  •  "/><Run Text="{Binding Source, Mode=OneWay}"/><Run Text="  •  "/><Run Text="{Binding VersionInstalled, Mode=OneWay}"/>
-                                </TextBlock>
-                                <Border x:Name="Pill" CornerRadius="9" Padding="9,4" HorizontalAlignment="Left"
-                                        Background="#F0F0F0" BorderThickness="0">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Ellipse x:Name="Dot" Width="8" Height="8" Fill="#8A8A8A" Margin="0,0,7,0"/>
-                                        <TextBlock x:Name="PillText" Text="{Binding StatusText, Mode=OneWay}" FontSize="12" Foreground="#616161"/>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-
-                            <!-- Actions -->
-                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
-                                <Button Content="Update" Style="{StaticResource CardButton}"
-                                        Background="{StaticResource AccentBrush}" Foreground="White" BorderThickness="0"
-                                        IsEnabled="{Binding CanUpdate, Mode=OneWay}"
-                                        Command="{Binding DataContext.UpdateOneCommand, ElementName=Root}"
-                                        CommandParameter="{Binding}"/>
-                                <Button Content="Log" Style="{StaticResource CardButton}" ToolTip="Show update log"
-                                        Background="White" BorderBrush="#E1DFDD" BorderThickness="1"
-                                        Visibility="{Binding HasFailureLog, Mode=OneWay, Converter={StaticResource BoolVis}}"
-                                        Command="{Binding DataContext.ShowLogCommand, ElementName=Root}"
-                                        CommandParameter="{Binding}"/>
-                                <Button Content="Skip" Style="{StaticResource CardButton}"
-                                        Background="White" BorderBrush="#E1DFDD" BorderThickness="1"
-                                        Command="{Binding DataContext.SkipCommand, ElementName=Root}"
-                                        CommandParameter="{Binding}"/>
-                                <Button Content="Site" Style="{StaticResource CardButton}" ToolTip="Open vendor site"
-                                        Background="White" BorderBrush="#E1DFDD" BorderThickness="1"
-                                        IsEnabled="{Binding HasVendorUrl, Mode=OneWay}"
-                                        Command="{Binding DataContext.OpenVendorCommand, ElementName=Root}"
-                                        CommandParameter="{Binding}"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                    <DataTemplate.Triggers>
-                        <!-- Blue: update available / working -->
-                        <DataTrigger Binding="{Binding StatusTone, Mode=OneWay}" Value="Blue">
-                            <Setter TargetName="Pill" Property="Background" Value="#E5F1FB"/>
-                            <Setter TargetName="Dot" Property="Fill" Value="#0067C0"/>
-                            <Setter TargetName="PillText" Property="Foreground" Value="#0067C0"/>
-                        </DataTrigger>
-                        <!-- Green: current -->
-                        <DataTrigger Binding="{Binding StatusTone, Mode=OneWay}" Value="Green">
-                            <Setter TargetName="Pill" Property="Background" Value="#E6F4EA"/>
-                            <Setter TargetName="Dot" Property="Fill" Value="#107C10"/>
-                            <Setter TargetName="PillText" Property="Foreground" Value="#107C10"/>
-                        </DataTrigger>
-                        <!-- Red: failed -->
-                        <DataTrigger Binding="{Binding StatusTone, Mode=OneWay}" Value="Red">
-                            <Setter TargetName="Pill" Property="Background" Value="#FDE7E9"/>
-                            <Setter TargetName="Dot" Property="Fill" Value="#C42B1C"/>
-                            <Setter TargetName="PillText" Property="Foreground" Value="#C42B1C"/>
-                        </DataTrigger>
-                    </DataTemplate.Triggers>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+            <!-- Empty state -->
+            <Border HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24"
+                    Visibility="Collapsed" Background="Transparent" IsHitTestVisible="False">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Filtered.Count, Mode=OneWay}" Value="0">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <StackPanel>
+                    <TextBlock Text="Nothing here" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextFgBrush}"/>
+                    <TextBlock Text="Try a different search or filter." FontSize="13" HorizontalAlignment="Center"
+                               Foreground="{DynamicResource MutedBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
     </DockPanel>
 </Window>

@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using UpdateLens.Win.Services;
 
 namespace UpdateLens.Win.Views;
@@ -10,6 +11,19 @@ public partial class SettingsWindow : Window
     public SettingsWindow()
     {
         InitializeComponent();
+        ThemeBox.ItemsSource = new[] { "System", "Light", "Dark" };
+        var current = ThemeService.CurrentMode();
+        ThemeBox.SelectedItem = current switch
+        {
+            "light" => "Light",
+            "dark" => "Dark",
+            _ => "System",
+        };
+        ThemeBox.SelectionChanged += (_, _) =>
+        {
+            if (ThemeBox.SelectedItem is string s)
+                ThemeService.SetMode(s.ToLowerInvariant());
+        };
         LaunchBox.IsChecked = SettingsService.GetLaunchAtLogin();
         DailyBox.IsChecked = SettingsService.GetDailyCheck();
         LaunchBox.Checked += (_, _) => SettingsService.SetLaunchAtLogin(true);

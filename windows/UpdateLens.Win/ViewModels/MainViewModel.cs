@@ -138,6 +138,12 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private string _lastChecked = "Never";
     public string LastChecked { get => _lastChecked; set { _lastChecked = value; OnPropertyChanged(); } }
 
+    public bool IsDark
+    {
+        get => ThemeService.IsDark;
+        set { ThemeService.SetDark(value); OnPropertyChanged(); }
+    }
+
     public int UpdateCount => Apps.Count(a => a.State == UpdateState.UpdateAvailable);
 
     public AsyncRelayCommand RefreshCommand { get; }
@@ -195,6 +201,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             var dlg = new SettingsWindow();
             if (p is Window owner) dlg.Owner = owner;
             if (dlg.ShowDialog() == true) _ = RefreshAsync();
+            OnPropertyChanged(nameof(IsDark)); // theme may have changed in Settings
         });
         ResetSkipsCommand = new AsyncRelayCommand(_ =>
         {
