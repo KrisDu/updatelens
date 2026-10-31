@@ -11,12 +11,14 @@ public sealed class AppInventoryService
 
     public bool WingetAvailable { get; private set; }
     public int PromotedCount { get; private set; }
+    public int AdoptedCount { get; private set; }
 
     public async Task<List<AppEntry>> RefreshAsync()
     {
         var reg = await Task.Run(() => _registry.Scan());
         WingetAvailable = _winget.IsAvailable();
         PromotedCount = 0;
+        AdoptedCount = 0;
 
         List<WingetRow> installed = new();
         Dictionary<string, (string Installed, string Available)> upgrades = new(StringComparer.OrdinalIgnoreCase);
@@ -87,6 +89,42 @@ public sealed class AppInventoryService
             }
         }
 
+        // (2) Adopt Manual apps that exist in the winget catalog but were installed
+        // outside winget (winget list shows them as ARP/* with no real Id).
+        // Cached: at most ~1 search per app per day; misses cached 7 days.
+        if (WingetAvailable)
+        {
+            var cache = new WingetAdoptionCache();
+            int budget = 15;
+            foreach (var r in results.Where(r => r.Source != AppSource.Winget))
+            {
+                string key = Norm(r.Name);
+                if (string.IsNullOrEmpty(key)) continue;
+                if (cache.TryGetFresh(key, TimeSpan.FromHours(24), out var cachedId, out var cachedLatest))
+                {
+                    AdoptAsWinget(r, cachedId, cachedLatest, usedWingetIds);
+                    continue;
+                }
+                if (cache.IsFreshMiss(key, TimeSpan.FromDays(7))) continue;
+                if (budget-- <= 0) continue;
+                try
+                {
+                    var cands = await _winget.SearchAsync(SearchQuery(r.Name), 3);
+                    var pick = PickAdoption(r.Name, cands);
+                    if (pick != null)
+                    {
+                        cache.StoreHit(key, pick.Id, pick.Available);
+                        AdoptAsWinget(r, pick.Id, pick.Available, usedWingetIds);
+                    }
+                    else cache.StoreMiss(key); // searched OK, catalog has no exact match
+                }
+                catch
+                {
+                    // Transient (lock/timeout/network): do NOT cache — retry next scan.
+                }
+            }
+        }
+
         // Apply upgrade info to promoted + existing winget rows
         foreach (var r in results.Where(r => r.Source == AppSource.Winget))
         {
@@ -97,13 +135,19 @@ public sealed class AppInventoryService
             }
             else
             {
-                // Check list's own Available column
+                // Check list's own Available column; keep adoption's
+                // provisional version when the list knows nothing about this Id.
                 if (byId.TryGetValue(r.Id, out var row) && !string.IsNullOrWhiteSpace(row.Available))
                 {
                     r.VersionAvailable = row.Available;
                     r.State = ShouldIgnore(r, row.Available) ? UpdateState.Ignored : UpdateState.UpdateAvailable;
                 }
-                else r.State = UpdateState.UpToDate;
+                else if (string.IsNullOrWhiteSpace(r.VersionAvailable))
+                    r.State = UpdateState.UpToDate;
+                else if (VersionHelper.IsNewer(r.VersionAvailable, r.VersionInstalled))
+                    r.State = ShouldIgnore(r, r.VersionAvailable!) ? UpdateState.Ignored : UpdateState.UpdateAvailable;
+                else
+                    r.State = UpdateState.UpToDate;
             }
         }
 
@@ -146,10 +190,52 @@ public sealed class AppInventoryService
             if (!string.IsNullOrWhiteSpace(r.VersionAvailable) && !string.IsNullOrWhiteSpace(r.IgnoredVersion)
                 && string.Equals(r.VersionAvailable, r.IgnoredVersion, StringComparison.OrdinalIgnoreCase))
                 r.State = UpdateState.Ignored;
+            // Vendor fallback so Site works even when the registry key has no URL.
+            if (r.State == UpdateState.Manual && string.IsNullOrWhiteSpace(r.VendorUrl)
+                && VendorMap.TryGet(r.Name, out var vurl, out _))
+                r.VendorUrl = vurl;
         }
 
         return results.OrderByDescending(a => a.State == UpdateState.UpdateAvailable)
                       .ThenBy(a => a.Name).ToList();
+    }
+
+    private void AdoptAsWinget(AppEntry r, string wingetId, string latest, HashSet<string> usedWingetIds)
+    {
+        r.Id = wingetId;
+        r.Source = AppSource.Winget;
+        usedWingetIds.Add(wingetId);
+        AdoptedCount++;
+        // Provisional: upgrade/list pass below refines it when authoritative data exists.
+        if (!string.IsNullOrWhiteSpace(latest) && !string.Equals(latest, "Unknown", StringComparison.OrdinalIgnoreCase)
+            && VersionHelper.IsNewer(latest, r.VersionInstalled))
+        {
+            r.VersionAvailable = latest;
+            r.State = ShouldIgnore(r, latest) ? UpdateState.Ignored : UpdateState.UpdateAvailable;
+        }
+    }
+
+    internal static string SearchQuery(string name)
+    {
+        var q = (name ?? "").Trim();
+        foreach (var p in new[] { "Microsoft ", "Logitech ", "Logi ", "Adobe ", "VideoLAN " })
+            if (q.StartsWith(p, StringComparison.OrdinalIgnoreCase)) { q = q[p.Length..].Trim(); break; }
+        q = Regex.Replace(q, @"\s*\(?(64-bit|x64|x86|64bit)\)?\s*$", "", RegexOptions.IgnoreCase).Trim();
+        return string.IsNullOrWhiteSpace(q) ? (name ?? "").Trim() : q;
+    }
+
+    /// <summary>Strict: adopt only on exact normalized-name match. Never guess.</summary>
+    internal static WingetRow? PickAdoption(string registryName, List<WingetRow> candidates)
+    {
+        var want = Norm(registryName);
+        if (string.IsNullOrEmpty(want)) return null;
+        foreach (var c in candidates)
+        {
+            if (!WingetService.IsRealWingetId(c.Id)) continue;
+            if (string.Equals(Norm(c.Name), want, StringComparison.Ordinal))
+                return c;
+        }
+        return null;
     }
 
     internal static string Norm(string s)
