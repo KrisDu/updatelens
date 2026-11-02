@@ -81,6 +81,7 @@ public sealed class AppRow : INotifyPropertyChanged
     };
 
     public bool CanUpdate => State == UpdateState.UpdateAvailable || State == UpdateState.Failed;
+    public bool CanUninstall => UninstallService.CanUninstall(Entry);
 
     /// <summary>Call after Entry.VersionInstalled changes in place.</summary>
     public void RefreshVersions()
@@ -158,6 +159,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public AsyncRelayCommand RefreshCommand { get; }
     public AsyncRelayCommand UpdateAllCommand { get; }
     public AsyncRelayCommand UpdateOneCommand { get; }
+    public AsyncRelayCommand UninstallCommand { get; }
     public RelayCommand SkipCommand { get; }
     public RelayCommand CancelCommand { get; }
     public RelayCommand OpenVendorCommand { get; }
@@ -170,6 +172,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         RefreshCommand = new AsyncRelayCommand(_ => RefreshAsync());
         UpdateAllCommand = new AsyncRelayCommand(_ => UpdateAllAsync(), _ => Apps.Any(a => a.State == UpdateState.UpdateAvailable));
         UpdateOneCommand = new AsyncRelayCommand(p => UpdateOneAsync(p as AppRow));
+        UninstallCommand = new AsyncRelayCommand(p => UninstallOneAsync(p as AppRow));
         SkipCommand = new RelayCommand(p =>
         {
             if (p is not AppRow r) return;
@@ -328,6 +331,41 @@ public sealed class MainViewModel : INotifyPropertyChanged
         finally { Busy = false; DoneCount = 0; TotalCount = 0; }
         RefreshCounts();
         ApplyFilter();
+    }
+
+    private async Task UninstallOneAsync(AppRow? row)
+    {
+        if (row is null || !row.CanUninstall || Busy) return;
+        var confirm = System.Windows.MessageBox.Show(
+            $"Uninstall {row.Name}?\nThis cannot be undone.", "UpdateLens",
+            MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (confirm != MessageBoxResult.Yes) return;
+
+        _cts = new CancellationTokenSource();
+        Busy = true; DoneCount = 0; TotalCount = 1;
+        try
+        {
+            row.State = UpdateState.Updating;
+            Status = $"Uninstalling {row.Name}…";
+            var (ok, code, log) = await UninstallService.UninstallAsync(row.Entry, _winget, _cts.Token);
+            row.LastLog = log;
+            if (!ok)
+            {
+                row.State = UpdateState.Failed;
+                Status = $"{row.Name} could not be uninstalled (exit {code}). Open Log for details.";
+                NotifyService.Balloon("Uninstall failed", $"{row.Name} (exit {code}).", System.Windows.Forms.ToolTipIcon.Error);
+            }
+            else
+            {
+                Apps.Remove(row);
+                Status = $"{row.Name} uninstalled.";
+                NotifyService.Balloon("Uninstalled", $"{row.Name} was removed.", System.Windows.Forms.ToolTipIcon.Info);
+            }
+        }
+        finally { Busy = false; DoneCount = 0; TotalCount = 0; }
+        RefreshCounts();
+        ApplyFilter();
+        if (Apps.Count > 0) _ = RefreshAsync(); // confirm removal + pick up stragglers
     }
 
     private async Task UpdateAllAsync()

@@ -41,6 +41,7 @@ public sealed class RegistryScanner
 
                         var displayIcon = sub.GetValue("DisplayIcon") as string;
                         var uninstall = sub.GetValue("UninstallString") as string;
+                        var quietUninstall = sub.GetValue("QuietUninstallString") as string;
                         results.Add(new AppEntry
                         {
                             Id = $"registry:{name}",
@@ -48,6 +49,8 @@ public sealed class RegistryScanner
                             VersionInstalled = (sub.GetValue("DisplayVersion") as string ?? "").Trim(),
                             Vendor = (publisher ?? "").Trim(),
                             ExePath = IconService.ResolveExe(displayIcon, uninstall),
+                            UninstallCommand = string.IsNullOrWhiteSpace(uninstall) ? null : uninstall.Trim(),
+                            QuietUninstallCommand = string.IsNullOrWhiteSpace(quietUninstall) ? null : quietUninstall.Trim(),
                             VendorUrl = (sub.GetValue("HelpLink") as string ?? sub.GetValue("URLInfoAbout") as string)?.Trim(),
                             Source = AppSource.System,
                             State = UpdateState.Unknown,

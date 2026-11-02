@@ -328,6 +328,10 @@
                                             IsEnabled="{Binding HasVendorUrl, Mode=OneWay}"
                                             Command="{Binding DataContext.OpenVendorCommand, ElementName=Root}"
                                             CommandParameter="{Binding}"/>
+                                    <Button Content="Uninstall" Style="{StaticResource CardGhost}" ToolTip="Uninstall this app"
+                                            IsEnabled="{Binding CanUninstall, Mode=OneWay}"
+                                            Command="{Binding DataContext.UninstallCommand, ElementName=Root}"
+                                            CommandParameter="{Binding}"/>
                                 </StackPanel>
                             </Grid>
                         </Border>

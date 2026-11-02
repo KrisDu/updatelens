@@ -197,4 +197,33 @@ public sealed class WingetService
             return (false, -1, log + "\n" + ex.Message);
         }
     }
+
+    public async Task<(bool Ok, int ExitCode, string Log)> UninstallAsync(string wingetId, CancellationToken ct)
+    {
+        var psi = new ProcessStartInfo("winget",
+            $"uninstall --id \"{wingetId}\" --silent --accept-source-agreements --disable-interactivity")
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+        using var p = new Process { StartInfo = psi };
+        var log = new System.Text.StringBuilder();
+        object logLock = new();
+        p.OutputDataReceived += (_, e) => { if (e.Data != null) lock (logLock) log.AppendLine(e.Data); };
+        p.ErrorDataReceived += (_, e) => { if (e.Data != null) lock (logLock) log.AppendLine(e.Data); };
+        try
+        {
+            p.Start();
+            p.BeginOutputReadLine();
+            p.BeginErrorReadLine();
+            await p.WaitForExitAsync(ct);
+            return (p.ExitCode == 0, p.ExitCode, log.ToString());
+        }
+        catch (Exception ex)
+        {
+            return (false, -1, log + "\n" + ex.Message);
+        }
+    }
 }

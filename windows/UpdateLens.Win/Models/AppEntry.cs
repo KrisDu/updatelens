@@ -34,6 +34,8 @@ public sealed class AppEntry
     public string? ExePath { get; set; }      // local exe for icon extraction (registry apps)
     public string? IconPath { get; set; }     // cached png, filled post-scan
     public string? LastLog { get; set; }      // last update attempt log
+    public string? UninstallCommand { get; set; }       // registry UninstallString
+    public string? QuietUninstallCommand { get; set; }  // registry QuietUninstallString
 
     public bool CanUpdate => State == UpdateState.UpdateAvailable;
 }
