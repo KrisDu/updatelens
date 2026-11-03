@@ -13,6 +13,9 @@ Desktop app that lists installed software and updates it — individually or all
   Drivers, runtimes, SDKs and system components are filtered out; only real user apps show.
 - **Update one or Update all** — per-row Update for anything with a newer version,
   or one click to update everything sequentially with a live progress bar.
+- **Uninstalls too** — per-row Uninstall for winget-managed apps and anything with
+  a registered uninstaller (quiet strings preferred, MSI made silent). Confirms first,
+  elevates only the uninstaller itself, rescans to confirm it's gone.
 - **Verifies every update** — re-reads the installed version after each upgrade and
   reports success (or "still on the old version") in a taskbar notification.
 - **Adopts winget for manual installs** — apps you installed from the web (VS Code, VLC,

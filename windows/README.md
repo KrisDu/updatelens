@@ -21,6 +21,7 @@ MVVM, no external NuGet packages (WPF + WinForms shared frameworks only).
 | Matching | `AppInventoryService.Norm/SearchQuery/PickAdoption`, `Services/WingetAdoptionCache.cs` | Registry → `winget list` fuzzy match, then exact-name `winget search` adoption (max ~15 fresh lookups/scan, 24h hit / 7d miss cache). |
 | Filtering | `Services/AppFilter.cs` | Hides runtimes, SDKs, drivers, Xaml/VCLibs, NVIDIA/Intel, KB updates. Allowlist keeps Edge, Terminal, WSL, VS Code. |
 | Manual apps | `Services/VendorMap.cs` | Fallback vendor URLs + guidance for what winget can't own (Adobe CC, Office C2R path, Logitech). |
+| Uninstall | `Services/UninstallService.cs`, `WingetService.UninstallAsync` | Winget via CLI; registry via QuietUninstallString (MSI silenced) with UAC elevate, confirm dialog, rescan to confirm. |
 | State | `Services/IgnoreStore.cs`, `Services/ScanCache.cs` | Skips/hides in `skips.json`; last scan in `last-scan.json` for instant startup. `%LocalAppData%\UpdateLens\` also holds icon cache, winget map, crash log. |
 | Icons | `Services/IconService.cs` | Extracts exe icons via DisplayIcon/UninstallString, caches PNGs by hash. |
 | Notifications | `Services/NotifyService.cs` | WinForms balloon tips (no WinRT dependency). |
